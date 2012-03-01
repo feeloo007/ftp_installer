@@ -24,17 +24,26 @@ import errno
 #     on alimente cette structure via le decorator add_to_d_fcts_for_module
 __d_fcts_for_module = {}
 
+__BYPASS_CALL_TO_REAL = '__bypass_call_to_real'
+
 
 __d_le_set_bypass_call_to_real = {
-    types.MethodType    : lambda fct: setattr( fct.im_func      , '__bypass_call_to_real', True ),
-    types.FunctionType  : lambda fct: setattr( fct              , '__bypass_call_to_real', True ),
+    types.MethodType    : lambda fct: setattr( fct.im_func      , __BYPASS_CALL_TO_REAL, True ),
+    types.FunctionType  : lambda fct: setattr( fct              , __BYPASS_CALL_TO_REAL, True ),
 }
 
 __d_le_has_bypass_call_to_real = {
-    types.MethodType    : lambda fct: hasattr( fct.im_func      , '__bypass_call_to_real' ),
-    types.FunctionType  : lambda fct: hasattr( fct              , '__bypass_call_to_real' ),
+    types.MethodType    : lambda fct: hasattr( fct.im_func      , __BYPASS_CALL_TO_REAL ),
+    types.FunctionType  : lambda fct: hasattr( fct              , __BYPASS_CALL_TO_REAL ),
     types.NoneType	: lambda fct: False,
 }
+
+__d_le_get_bypass_call_to_real = {
+    types.MethodType    : lambda fct: getattr( fct.im_func      , __BYPASS_CALL_TO_REAL ),
+    types.FunctionType  : lambda fct: getattr( fct              , __BYPASS_CALL_TO_REAL ),
+    types.NoneType      : lambda fct: False,
+}
+
 
 def add_to_d_fcts_for_module( m ):
 
@@ -50,18 +59,23 @@ def add_to_d_fcts_for_module( m ):
          def wrapped( *args, **kwargs ):
 
              f 			= inspect.currentframe( 1 )
-             is_real_bypassed 	= False
+             real_call_bypassed	= None
 
-             while f:
-                 if __d_le_has_bypass_call_to_real[ type( f.f_globals.get( f.f_code.co_name ) ) ]( f.f_globals.get( f.f_code.co_name ) ):
-                     is_real_bypassed = True
-                     break
-                 elif __d_le_has_bypass_call_to_real[ type( f.f_locals.get( 'fct' ) ) ]( f.f_locals.get( 'fct' ) ):
-                     is_real_bypassed = True
-                     break
-                 f = f.f_back
+             try:
+                 while f:
+                     for function_ in ( f.f_globals.get( f.f_code.co_name ), f.f_locals.get( 'fct' ) ):
 
-             if is_real_bypassed:
+                         if __d_le_has_bypass_call_to_real[ type( function_ ) ]( function_ ):
+                             real_call_bypassed = __d_le_get_bypass_call_to_real[ type( function_ ) ]( function_ )
+                             raise
+
+                     f = f.f_back
+             except:
+                 pass
+             finally:
+                 del f
+
+             if real_call_bypassed:
                   return __d_fcts_for_module[ m ][ fct.__name__ ][ 1 ]( *args, **kwargs )
              else:
                   return __d_fcts_for_module[ m ][ fct.__name__ ][ 0 ]( *args, **kwargs )
