@@ -74,8 +74,6 @@ class VirtualMap( object ):
      
         l_dir = path.split( '/' )[ 1: ]
 
-        print( len( l_dir ) )
-
         try:
 
             return [ 
