@@ -28,8 +28,8 @@ __BYPASS_CALL_TO_REAL = '__bypass_call_to_real'
 
 
 __d_le_set_bypass_call_to_real = {
-    types.MethodType    : lambda fct: setattr( fct.im_func      , __BYPASS_CALL_TO_REAL, True ),
-    types.FunctionType  : lambda fct: setattr( fct              , __BYPASS_CALL_TO_REAL, True ),
+    types.MethodType    : lambda fct, d_virtual_params: setattr( fct.im_func      , __BYPASS_CALL_TO_REAL, d_virtual_params ),
+    types.FunctionType  : lambda fct, d_virtual_params: setattr( fct              , __BYPASS_CALL_TO_REAL, d_virtual_params ),
 }
 
 __d_le_has_bypass_call_to_real = {
@@ -38,12 +38,28 @@ __d_le_has_bypass_call_to_real = {
     types.NoneType	: lambda fct: False,
 }
 
-__d_le_get_bypass_call_to_real = {
+__d_le_get_d_virtual_params = {
     types.MethodType    : lambda fct: getattr( fct.im_func      , __BYPASS_CALL_TO_REAL ),
     types.FunctionType  : lambda fct: getattr( fct              , __BYPASS_CALL_TO_REAL ),
     types.NoneType      : lambda fct: False,
 }
 
+
+PATH_TO_CHROOT 		= 'path_to_chroot'
+PATH_TO_BROKEN_PATH 	= 'path_to_broken_path'
+def has_virtual_params( fct ):
+
+    @functools.wraps( fct )
+    def wrapped( *args, **kwargs ):
+
+        assert( kwargs.has_key( 'path_to_chroot' ) )		, u'kwargs ne contient pas %s' % PATH_TO_CHROOT
+        assert( kwargs.has_key( 'path_to_broken_path' ) )	, u'kwargs ne contient pas %s' % PATH_TO_BROKEN_PATH
+
+        return fct( *args, **kwargs )
+
+    return wrapped
+
+__virtual_map = virtual_map.VirtualMap()
 
 def add_to_d_fcts_for_module( m ):
 
@@ -59,14 +75,14 @@ def add_to_d_fcts_for_module( m ):
          def wrapped( *args, **kwargs ):
 
              f 			= inspect.currentframe( 1 )
-             real_call_bypassed	= None
+             d_virtual_params	= {}
 
              try:
                  while f:
                      for function_ in ( f.f_globals.get( f.f_code.co_name ), f.f_locals.get( 'fct' ) ):
 
                          if __d_le_has_bypass_call_to_real[ type( function_ ) ]( function_ ):
-                             real_call_bypassed = __d_le_get_bypass_call_to_real[ type( function_ ) ]( function_ )
+                             d_virtual_params = __d_le_get_d_virtual_params[ type( function_ ) ]( function_ )
                              raise
 
                      f = f.f_back
@@ -75,7 +91,8 @@ def add_to_d_fcts_for_module( m ):
              finally:
                  del f
 
-             if real_call_bypassed:
+             if d_virtual_params:
+                  kwargs.update( d_virtual_params ) 
                   return __d_fcts_for_module[ m ][ fct.__name__ ][ 1 ]( *args, **kwargs )
              else:
                   return __d_fcts_for_module[ m ][ fct.__name__ ][ 0 ]( *args, **kwargs )
@@ -86,26 +103,26 @@ def add_to_d_fcts_for_module( m ):
 
 
 
+def bypass_call_to_real( fct, d_virtual_params = { PATH_TO_CHROOT: '/home/cloudmgr/.emptydir', PATH_TO_BROKEN_PATH: '/home/cloudmgr/.emptydir/BROKEN' } ):
 
-def bypass_call_to_real( fct ):
-
-     __d_le_set_bypass_call_to_real[ type( fct ) ]( fct )
+     __d_le_set_bypass_call_to_real[ type( fct ) ]( fct, d_virtual_params )
 
      return fct
-          
 
-__virtual_map = virtual_map.VirtualMap()
+
    
 @add_to_d_fcts_for_module( os )
+@has_virtual_params
 @bip.bip
-def getcwd():
+def getcwd( *args, **kwargs ):
 
     return '/'
 
 
 @add_to_d_fcts_for_module( os )
+@has_virtual_params
 @bip.bip
-def listdir( path ):
+def listdir( path, *args, **kwargs ):
     """
        Version virtual de listdir
     """
@@ -126,8 +143,9 @@ def listdir( path ):
 
 
 @add_to_d_fcts_for_module( os )
+@has_virtual_params
 @bip.bip
-def lstat( path ):
+def lstat( path, *args, **kwargs ):
     """
        Version virtual de lstat
     """
@@ -136,7 +154,7 @@ def lstat( path ):
 
     if is_virtual and not is_remote:
 
-        return __d_fcts_for_module[ os ][ 'lstat' ][ 0 ]( '/home/cloudmgr/.emptydir' )
+        return __d_fcts_for_module[ os ][ 'lstat' ][ 0 ]( kwargs[ PATH_TO_CHROOT ] )
  
     elif is_virtual and is_remote:
 
@@ -144,12 +162,13 @@ def lstat( path ):
 
     else:
 
-        return __d_fcts_for_module[ os ][ 'lstat' ][ 0 ]( '/home/cloudmgr/.emptydir/BROKEN' )
+        return __d_fcts_for_module[ os ][ 'lstat' ][ 0 ]( kwargs[ PATH_TO_BROKEN_PATH ] )
 
 
 @add_to_d_fcts_for_module( os )
+@has_virtual_params
 @bip.bip
-def chdir( path ):
+def chdir( path, *args, **kwargs ):
 
     is_virtual, is_remote, dirs = __virtual_map.is_virtual( path )
 
@@ -167,8 +186,9 @@ def chdir( path ):
 
 
 @add_to_d_fcts_for_module( os.path )
+@has_virtual_params
 @bip.bip
-def isdir( path ):
+def isdir( path, *args, **kwargs ):
 
     is_virtual, is_remote, dirs = __virtual_map.is_virtual( path )
 
@@ -182,5 +202,4 @@ def isdir( path ):
 
     else:
 
-        #return __d_fcts_for_module[ os.path ][ 'isdir' ][ 0 ]( '/home/cloudmgr/.emptydir/BROKEN' )
         return False
