@@ -25,33 +25,30 @@ class FTPInstallerAbstractedFS( ftpserver.AbstractedFS ):
 
         ftpserver.AbstractedFS.__init__( self, '/home/cloudmgr/.emptydir', cmd_channel )
 
-
         # Boucle sur les methodes qui voient leur module os virtualise
         for mth in [
-                        member[ 0 ]
-                        for member in inspect.getmembers( FTPInstallerAbstractedFS )
-                        if member[ 0 ] in ( 
-                                               'listdir', 
-                                               'get_list_dir', 
-                                               'isdir', 
-                                               'format_list', 
-                                               'lstat', 
-                                               'chdir' 
-                                          )
-                    ]:
-
-             setattr( 
-                          FTPInstallerAbstractedFS, 
-                          mth, 
-                          os_from_virtual_map.swith_to_virtual_module( True )( 
-                              getattr( 
-                                          FTPInstallerAbstractedFS,
-                                          mth 
-                              ) 
-                          ) 
+             member[ 0 ]
+             for member in inspect.getmembers( FTPInstallerAbstractedFS )
+             if member[ 0 ] in (
+                 'listdir',
+                 'get_list_dir',
+                 'isdir',
+                 'format_list',
+                 'lstat',
+                 'chdir'
              )
+        ]:
 
-
+            setattr(
+                FTPInstallerAbstractedFS,
+                mth,
+                os_from_virtual_map.bypass_call_to_real(
+                    getattr(
+                        FTPInstallerAbstractedFS,
+                        mth
+                    )
+                )
+            )
 
     def ftp2fs(self, ftppath ):
 
