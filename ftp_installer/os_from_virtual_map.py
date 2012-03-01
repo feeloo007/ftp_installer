@@ -6,8 +6,14 @@ import virtual_map
 import bip
 import functools
 
+import inspect
 
-# Structure deavnt contenir :
+import types
+
+import errno
+
+
+# Structure devant contenir :
 #     en cle, un module
 #     en valeur, un dictionnaire
 #     ce second niveau de dictionnaire contient
@@ -19,70 +25,67 @@ import functools
 __d_fcts_for_module = {}
 
 
+__d_le_set_bypass_call_to_real = {
+    types.MethodType    : lambda fct: setattr( fct.im_func      , '__bypass_call_to_real', True ),
+    types.FunctionType  : lambda fct: setattr( fct              , '__bypass_call_to_real', True ),
+}
+
+__d_le_has_bypass_call_to_real = {
+    types.MethodType    : lambda fct: hasattr( fct.im_func      , '__bypass_call_to_real' ),
+    types.FunctionType  : lambda fct: hasattr( fct              , '__bypass_call_to_real' ),
+    types.NoneType	: lambda fct: False,
+}
+
 def add_to_d_fcts_for_module( m ):
 
      __d_fcts_for_module.setdefault( m, {} )
 
      def wrapper( fct ):
 
-         assert( not __d_fcts_for_module[ m ].has_key( fct.__name__ ) ), u'La fonction a deja ete ecrasee'
+         assert( not __d_fcts_for_module[ m ].has_key( fct.__name__ ) ), u'La fonction a deja ete enregistree'
 
          __d_fcts_for_module[ m ][ fct.__name__ ] = ( getattr( m, fct.__name__ ), fct )
 
-         return fct
+         @functools.wraps( fct )
+         def wrapped( *args, **kwargs ):
+
+             f 			= inspect.currentframe( 1 )
+             is_real_bypassed 	= False
+
+             while f:
+                 if __d_le_has_bypass_call_to_real[ type( f.f_globals.get( f.f_code.co_name ) ) ]( f.f_globals.get( f.f_code.co_name ) ):
+                     is_real_bypassed = True
+                     break
+                 elif __d_le_has_bypass_call_to_real[ type( f.f_locals.get( 'fct' ) ) ]( f.f_locals.get( 'fct' ) ):
+                     is_real_bypassed = True
+                     break
+                 f = f.f_back
+
+             if is_real_bypassed:
+                  return __d_fcts_for_module[ m ][ fct.__name__ ][ 1 ]( *args, **kwargs )
+             else:
+                  return __d_fcts_for_module[ m ][ fct.__name__ ][ 0 ]( *args, **kwargs )
+
+         setattr( m, fct.__name__, wrapped )
 
      return wrapper
 
 
-def swith_to_virtual_module( switched_to_virtual_os = False ):
-    """
-       Decorator a ajouter a une methode pour utiliser automatique 
-       la version virtuel de os
-    """
 
-    def wrapper( fct ):
 
-        @functools.wraps( fct )
+def bypass_call_to_real( fct ):
 
-        def wrapped( *args, **kwargs ):
+     __d_le_set_bypass_call_to_real[ type( fct ) ]( fct )
 
-            swith = -1
-
-            if switched_to_virtual_os:
-                swith = 1
-            else:
-                swith = 0
-
-            d_old_fcts_for_module = {}
-
-            for m, d_fcts in __d_fcts_for_module.items():
-
-                for fct_name in d_fcts.keys(): 
-
-                    d_old_fcts_for_module.setdefault( m, {} ).setdefault( fct_name, getattr( m, fct_name ) )
-
-                    setattr( m, fct_name, __d_fcts_for_module[ m ][ fct_name ][ swith ] )
-
-            result = fct( *args, **kwargs )
-
-            for m, d_fcts in __d_fcts_for_module.items():
-
-                for fct_name in d_fcts.keys(): 
-
-                    setattr( m, fct_name, d_old_fcts_for_module[ m ][ fct_name ] )
-
-            return result
-
-        return wrapped
-
-    return wrapper
-
+     return fct
+          
 
 __virtual_map = virtual_map.VirtualMap()
    
 @add_to_d_fcts_for_module( os )
 @bip.bip
 def getcwd():
+
     return '/'
 
 
@@ -96,11 +99,16 @@ def listdir( path ):
     is_virtual, is_remote, dirs = __virtual_map.is_virtual( path )
 
     if is_virtual and not is_remote:
+
         return dirs
+
     elif is_virtual and is_remote:
+
         assert( False ), u'A implementer'
+
     else:
-        return []
+
+        raise
 
 
 @add_to_d_fcts_for_module( os )
@@ -122,7 +130,7 @@ def lstat( path ):
 
     else:
 
-        return ''
+        return __d_fcts_for_module[ os ][ 'lstat' ][ 0 ]( '/home/cloudmgr/.emptydir/BROKEN' )
 
 
 @add_to_d_fcts_for_module( os )
@@ -140,7 +148,8 @@ def chdir( path ):
         assert( False ), u'A implementer'
 
     else:
-        __d_fcts_for_module[ os ][ 'lstat' ][ 0 ]( path )
+
+        raise OSError( errno.ENOENT, path )
 
 
 @add_to_d_fcts_for_module( os.path )
@@ -159,4 +168,5 @@ def isdir( path ):
 
     else:
 
-        __d_fcts_for_module[ os ][ 'lstat' ][ 0 ]( path )
+        #return __d_fcts_for_module[ os.path ][ 'isdir' ][ 0 ]( '/home/cloudmgr/.emptydir/BROKEN' )
+        return False
