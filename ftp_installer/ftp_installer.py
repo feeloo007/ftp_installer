@@ -8,7 +8,7 @@ def main():
     authorizer.add_user( 
         'test', 
         password	= 'test', 
-        homedir 	= '.', 
+        homedir 	= '/home/cloudmgr/.witnessdir', 
         perm		= 'elradfmw' 
     )
 

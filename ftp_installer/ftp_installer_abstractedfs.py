@@ -23,7 +23,7 @@ class FTPInstallerAbstractedFS( ftpserver.AbstractedFS ):
         # to reflect the real filesystem) users overriding this class
         # are responsible to set _cwd attribute as necessary.
 
-        ftpserver.AbstractedFS.__init__( self, '/home/cloudmgr/.emptydir', cmd_channel )
+        ftpserver.AbstractedFS.__init__( self, '/home/cloudmgr/.witnessdir', cmd_channel )
 
         # Boucle sur les methodes qui voient leur module os virtualise
         for mth in [
