@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+
+import os_from_remote
+
 class VirtualMap( object ):
 
     INFOS 		 	= 'infos' 
@@ -19,57 +22,57 @@ class VirtualMap( object ):
     def __init__( self ):
         
         self.__d = {
-                    'X04': {
-                            'R7': { 
-                                   'TOMCAT': {
-                                              '0001': {
-                                                       'VILLE': {
-                                                                 'WEBAPP_INSTALLER': {
-                                                                                      'LOGIN': 		'X04_0001_WEBAPP_INSTALLER',
-                                                                                      'SERVER':		'X04-R7-TOMCAT-0001-VILLE',
-                                                                                      'PASSWORD': 	'X04_0001_WEBAPP_INSTALLER',
-                                                                                      'ROOT':		'/',
-                                                                                     },
-                                                                 'WEBAPP_RO': {
-                                                                               'LOGIN':          'X04_0001_WEBAPP_RO',
-                                                                               'SERVER':         'X04-R7-TOMCAT-0001-VILLE',
-                                                                               'PASSWORD':       'X04_0001_WEBAPP_RO',
-                                                                               'ROOT':           '/',
-                                                                              },
-                                                                 'DATAS': {
-                                                                           'LOGIN': 		'X04_0001_WEBAPP_INSTALLER',
-                                                                           'SERVER':		'X04-R7-TOMCAT-0001-VILLE',
-                                                                           'PASSWORD': 		'X04_0001_WEBAPP_INSTALLER',
-                                                                           'ROOT':		'/',
-                                                                          },
-                                                                }
-                                                      },
-                                              '0002': {
-                                                       'VILLE': {
-                                                                 'WEBAPP_INSTALLER': {
-                                                                                      'LOGIN': 		'X01_0002_WEBAPP_INSTALLER',
-                                                                                      'SERVER':		'X04-R7-TOMCAT-0001-VILLE',
-                                                                                      'PASSWORD': 	'X01_0002_WEBAPP_INSTALLER',
-                                                                                      'ROOT':		'/',
-                                                                                     },
-                                                                 'WEBAPP_RO': {
-                                                                               'LOGIN':          'X04_0002_WEBAPP_RO',
-                                                                               'SERVER':         'X04-R7-TOMCAT-0002-VILLE',
-                                                                               'PASSWORD':       'X04_0002_WEBAPP_RO',
-                                                                               'ROOT':           '/',
-                                                                              },
-                                                                 'DATAS': {
-                                                                           'LOGIN': 		'X04_0002_WEBAPP_INSTALLER',
-                                                                           'SERVER':		'X04-R7-TOMCAT-0002-VILLE',
-                                                                           'PASSWORD': 		'X04_0002_WEBAPP_INSTALLER',
-                                                                           'ROOT':		'/',
-                                                                          },
-                                                                }
-                                                      }
-                                             }
-                                  }
-                           }
-                   }
+            'X04'	: {
+                'R7'	: { 
+                    'TOMCAT'	: {
+                        '0001'	: {
+                            'VILLE'	: {
+                                'WEBAPP_INSTALLER'	: {
+                                    os_from_remote.OsFromRemote.LOGIN		: 'X04_0001_WEBAPP_INSTALLER',
+                                    os_from_remote.OsFromRemote.SERVER		: 'X04-R7-TOMCAT-0001-VILLE',
+                                    os_from_remote.OsFromRemote.PASSWORD	: 'X04_0001_WEBAPP_INSTALLER',
+                                    os_from_remote.OsFromRemote.ROOT		: '/',
+                                },
+                                'WEBAPP_RO': {
+                                    os_from_remote.OsFromRemote.LOGIN		: 'X04_0001_WEBAPP_RO',
+                                    os_from_remote.OsFromRemote.SERVER		: 'X04-R7-TOMCAT-0001-VILLE',
+                                    os_from_remote.OsFromRemote.PASSWORD 	: 'X04_0001_WEBAPP_RO',
+                                    os_from_remote.OsFromRemote.ROOT		: '/',
+                                },
+                                'DATAS': {
+                                    os_from_remote.OsFromRemote.LOGIN		: 'X04_0001_WEBAPP_INSTALLER',
+                                    os_from_remote.OsFromRemote.SERVER		: 'X04-R7-TOMCAT-0001-VILLE',
+                                    os_from_remote.OsFromRemote.PASSWORD	: 'X04_0001_WEBAPP_INSTALLER',
+                                    os_from_remote.OsFromRemote.ROOT		: '/',
+                                },
+                            }
+                        },
+                        '0002': {
+                            'VILLE': {
+                                'WEBAPP_INSTALLER': {
+                                    os_from_remote.OsFromRemote.LOGIN		: 'X01_0002_WEBAPP_INSTALLER',
+                                    os_from_remote.OsFromRemote.SERVER		: 'X04-R7-TOMCAT-0001-VILLE',
+                                    os_from_remote.OsFromRemote.PASSWORD	: 'X01_0002_WEBAPP_INSTALLER',
+                                    os_from_remote.OsFromRemote.ROOT		: '/',
+                                },
+                                'WEBAPP_RO': {
+                                    os_from_remote.OsFromRemote.LOGIN		: 'X04_0002_WEBAPP_RO',
+                                    os_from_remote.OsFromRemote.SERVER		: 'X04-R7-TOMCAT-0002-VILLE',
+                                    os_from_remote.OsFromRemote.PASSWORD	: 'X04_0002_WEBAPP_RO',
+                                    os_from_remote.OsFromRemote.ROOT		: '/',
+                                },
+                                'DATAS': {
+                                    os_from_remote.OsFromRemote.LOGIN		: 'X04_0002_WEBAPP_INSTALLER',
+                                    os_from_remote.OsFromRemote.SERVER		: 'X04-R7-TOMCAT-0002-VILLE',
+                                    os_from_remote.OsFromRemote.PASSWORD	: 'X04_0002_WEBAPP_INSTALLER',
+                                    os_from_remote.OsFromRemote.ROOT		: '/',
+                                },
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
                    
     def is_virtual( self, path ):
