@@ -2,13 +2,14 @@
 # -*- coding: UTF-8 -*-
 class VirtualMap( object ):
 
-    __max_keys = 5
+    __depth_for_remote = 6
     __d_le = {
-                 1:   lambda self, appcode                                          : self.__d[ appcode ],
-                 2:   lambda self, appcode, env                                     : self.__d[ appcode ][ env ],
-                 3:   lambda self, appcode, env, appcomp                            : self.__d[ appcode ][ env ][ appcomp ],
-                 4:   lambda self, appcode, env, appcomp, num_component             : self.__d[ appcode ][ env ][ appcomp ][ num_component ],
-                 5:   lambda self, appcode, env, appcomp, num_component, aera       : self.__d[ appcode ][ env ][ appcomp ][ num_component ][ aera ],
+                 1:   lambda self, appcode                                          			: self.__d[ appcode ],
+                 2:   lambda self, appcode, env                                     			: self.__d[ appcode ][ env ],
+                 3:   lambda self, appcode, env, appcomp                            			: self.__d[ appcode ][ env ][ appcomp ],
+                 4:   lambda self, appcode, env, appcomp, num_component             			: self.__d[ appcode ][ env ][ appcomp ][ num_component ],
+                 5:   lambda self, appcode, env, appcomp, num_component, aera                  		: self.__d[ appcode ][ env ][ appcomp ][ num_component ][ aera ],
+                 6:   lambda self, appcode, env, appcomp, num_component, aera, connections_info 	: self.__d[ appcode ][ env ][ appcomp ][ num_component ][ aera ][ connections_info ],
     }
 
     def __init__( self ):
@@ -78,13 +79,13 @@ class VirtualMap( object ):
 
             return [ 
                        True, 
-                       len( l_dir ) >  VirtualMap.__max_keys,
+                       len( l_dir ) >  VirtualMap.__depth_for_remote,
                        VirtualMap.__d_le[
                                               min(
                                                       len( l_dir ),
-                                                      VirtualMap.__max_keys
+                                                      VirtualMap.__depth_for_remote
                                                  )
-                                        ]( self, *l_dir ).keys()
+                                        ]( self, *l_dir[ :VirtualMap.__depth_for_remote ] ).keys()
                    ]
 
         except Exception, e:
