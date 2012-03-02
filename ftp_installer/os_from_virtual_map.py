@@ -133,11 +133,13 @@ def listdir( path, *args, **kwargs ):
        Version virtual de listdir
     """
 
-    is_virtual, is_remote, dirs = __virtual_map.is_virtual( path )
+    is_virtual, is_remote, infos = __virtual_map.is_virtual( path )
+
+    print infos
 
     if is_virtual and not is_remote:
 
-        return dirs
+        return infos[ virtual_map.VirtualMap.INFOS ].keys()
 
     elif is_virtual and is_remote:
 
@@ -154,7 +156,7 @@ def lstat( path, *args, **kwargs ):
        Version virtual de lstat
     """
 
-    is_virtual, is_remote, dirs = __virtual_map.is_virtual( path )
+    is_virtual, is_remote, infos = __virtual_map.is_virtual( path )
 
     if is_virtual and not is_remote:
 
@@ -162,6 +164,7 @@ def lstat( path, *args, **kwargs ):
  
     elif is_virtual and is_remote:
 
+        print infos
         assert( False ), u'A implementer'
 
     else:
@@ -172,7 +175,7 @@ def lstat( path, *args, **kwargs ):
 @add_to_d_fcts_for_module( os )
 def chdir( path, *args, **kwargs ):
 
-    is_virtual, is_remote, dirs = __virtual_map.is_virtual( path )
+    is_virtual, is_remote, infos = __virtual_map.is_virtual( path )
 
     if is_virtual and not is_remote:
 
@@ -190,7 +193,7 @@ def chdir( path, *args, **kwargs ):
 @add_to_d_fcts_for_module( os.path )
 def isdir( path, *args, **kwargs ):
 
-    is_virtual, is_remote, dirs = __virtual_map.is_virtual( path )
+    is_virtual, is_remote, infos = __virtual_map.is_virtual( path )
 
     if is_virtual and not is_remote:
 
@@ -198,6 +201,7 @@ def isdir( path, *args, **kwargs ):
 
     elif is_virtual and is_remote:
 
+        print infos
         assert( False ), u'A implementer'
 
     else:

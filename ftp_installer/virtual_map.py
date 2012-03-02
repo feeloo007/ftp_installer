@@ -2,6 +2,10 @@
 # -*- coding: UTF-8 -*-
 class VirtualMap( object ):
 
+    INFOS 		 	= 'infos' 
+    VIRTUAL_PATH_SEGMENT 	= 'virtual_path_segment' 
+    REMOTE_PATH_SEGMENT	 	= 'remote_path_segment' 
+
     __depth_for_remote = 6
     __d_le = {
                  1:   lambda self, appcode                                          			: self.__d[ appcode ],
@@ -71,7 +75,15 @@ class VirtualMap( object ):
     def is_virtual( self, path ):
 
         if path == '/':
-            return [ True, False, self.__d.keys() ]
+            return [ 
+                       True, 
+                       False, 
+                       { 
+                            VirtualMap.INFOS			: self.__d, 
+                            VirtualMap.VIRTUAL_PATH_SEGMENT	: '/', 
+                            VirtualMap.REMOTE_PATH_SEGMENT	: None 
+                       } 
+                   ]
      
         l_dir = path.split( '/' )[ 1: ]
 
@@ -80,17 +92,21 @@ class VirtualMap( object ):
             return [ 
                        True, 
                        len( l_dir ) >  VirtualMap.__depth_for_remote,
-                       VirtualMap.__d_le[
-                                              min(
-                                                      len( l_dir ),
-                                                      VirtualMap.__depth_for_remote
-                                                 )
-                                        ]( self, *l_dir[ :VirtualMap.__depth_for_remote ] ).keys()
+                       {
+                           VirtualMap.INFOS			: VirtualMap.__d_le[
+                                                                      len( l_dir[ :VirtualMap.__depth_for_remote ] )
+                                                                  ]( 
+                                                                        self, 
+                                                                        *l_dir[ :VirtualMap.__depth_for_remote ] 
+                                                                   ),
+                           VirtualMap.VIRTUAL_PATH_SEGMENT      : l_dir[ :VirtualMap.__depth_for_remote ],
+                           VirtualMap.REMOTE_PATH_SEGMENT 	: l_dir[ VirtualMap.__depth_for_remote:: ],
+                       }
                    ]
 
         except Exception, e:
             from colorama import Fore
             print( Fore.RED + repr( e  ) + Fore.RESET )
-            return [ False, False,  [ 'REMOTE' ] ]
+            return [ False, False,  {} ]
         
-        return [ False, False, [] ]
+        return [ False, False, {} ]
