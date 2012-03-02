@@ -52,8 +52,8 @@ def has_virtual_params( fct ):
     @functools.wraps( fct )
     def wrapped( *args, **kwargs ):
 
-        assert( kwargs.has_key( 'path_to_chroot' ) )		, u'kwargs ne contient pas %s' % PATH_TO_CHROOT
-        assert( kwargs.has_key( 'path_to_broken_path' ) )	, u'kwargs ne contient pas %s' % PATH_TO_BROKEN_PATH
+        assert( kwargs.has_key( PATH_TO_CHROOT ) )		, u'kwargs ne contient pas %s' % PATH_TO_CHROOT
+        assert( kwargs.has_key( PATH_TO_BROKEN_PATH ) )		, u'kwargs ne contient pas %s' % PATH_TO_BROKEN_PATH
 
         return fct( *args, **kwargs )
 
@@ -69,7 +69,17 @@ def add_to_d_fcts_for_module( m ):
 
          assert( not __d_fcts_for_module[ m ].has_key( fct.__name__ ) ), u'La fonction a deja ete enregistree'
 
-         __d_fcts_for_module[ m ][ fct.__name__ ] = ( getattr( m, fct.__name__ ), fct )
+         __d_fcts_for_module[ m ][ fct.__name__ ] = ( 
+             getattr( 
+                 m, 
+                 fct.__name__ 
+             ),
+             has_virtual_params(
+                 bip.bip(  
+                      fct
+                 ) 
+             )
+         )
 
          @functools.wraps( fct )
          def wrapped( *args, **kwargs ):
@@ -112,16 +122,12 @@ def bypass_call_to_real( fct, d_virtual_params = { PATH_TO_CHROOT: '/home/cloudm
 
    
 @add_to_d_fcts_for_module( os )
-@has_virtual_params
-@bip.bip
 def getcwd( *args, **kwargs ):
 
     return '/'
 
 
 @add_to_d_fcts_for_module( os )
-@has_virtual_params
-@bip.bip
 def listdir( path, *args, **kwargs ):
     """
        Version virtual de listdir
@@ -143,8 +149,6 @@ def listdir( path, *args, **kwargs ):
 
 
 @add_to_d_fcts_for_module( os )
-@has_virtual_params
-@bip.bip
 def lstat( path, *args, **kwargs ):
     """
        Version virtual de lstat
@@ -166,8 +170,6 @@ def lstat( path, *args, **kwargs ):
 
 
 @add_to_d_fcts_for_module( os )
-@has_virtual_params
-@bip.bip
 def chdir( path, *args, **kwargs ):
 
     is_virtual, is_remote, dirs = __virtual_map.is_virtual( path )
@@ -186,8 +188,6 @@ def chdir( path, *args, **kwargs ):
 
 
 @add_to_d_fcts_for_module( os.path )
-@has_virtual_params
-@bip.bip
 def isdir( path, *args, **kwargs ):
 
     is_virtual, is_remote, dirs = __virtual_map.is_virtual( path )
