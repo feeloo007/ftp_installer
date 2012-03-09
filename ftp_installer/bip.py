@@ -9,13 +9,16 @@ import inspect
 
 import functools
 
+import pprint
+
 def bip( fct ):
 
     @functools.wraps( fct )
     
     def wrapped( *args, **kwargs ):
 
-        bip_message = ''.join( ' ' for i in range( len( traceback.format_stack() ) ) )
+        bip_message = ''
+        #bip_message = ''.join( ' ' for i in range( len( traceback.format_stack() ) ) )
 
         bip_message += '%s(%s, %s)' % ( fct.__name__, args, kwargs )
 
@@ -23,7 +26,7 @@ def bip( fct ):
 
         result = fct( *args, **kwargs )
 
-        bip_message += ' = %s' % ( result )
+        bip_message += ' = %s' % ( pprint.pformat ( result ) )
 
         print( Fore.BLUE + bip_message + Fore.RESET )
 

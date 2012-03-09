@@ -4,6 +4,8 @@ from pyftpdlib                  import ftpserver
 
 import bip
 
+import os
+
 import inspect
 
 # Chargement du module ecrasant les fonctions de os
@@ -34,8 +36,12 @@ class FTPInstallerAbstractedFS( ftpserver.AbstractedFS ):
                  'get_list_dir',
                  'isdir',
                  'format_list',
+                 'format_mlsx',
+                 'stat',
                  'lstat',
-                 'chdir'
+                 'chdir',
+                 'mkdir',
+                 'open',
              )
         ]:
 
@@ -61,3 +67,15 @@ class FTPInstallerAbstractedFS( ftpserver.AbstractedFS ):
     def validpath( self, path ):
 
         return True
+
+    def get_user_by_uid( self, uid ):
+
+        return 'cloudmgr'
+
+    def get_group_by_gid( self, gid ):
+
+        return 'cloudmgr'
+
+    def open( self, filename, *args, **kwargs ):
+     
+        return os.open( filename, *args, **kwargs )
