@@ -224,10 +224,12 @@ ascii_upload_enable=NO''',
     }
 
     d_num_component_2_id_in_username = {
-        '0001'      : 'fo',
-        '0002'      : 'bo',
-        'FO'        : 'fo',
-        'BO'        : 'bo',
+        #'0001'      : 'fo',
+        #'0002'      : 'bo',
+        '0001'      : 'pr',
+        '0002'      : 'pp',
+        'FO'        : 'pr',
+        'BO'        : 'pp',
     }
 
     d_appcomp_2_appcomp_in_username = {
@@ -235,16 +237,9 @@ ascii_upload_enable=NO''',
         'MYSQL'     : 'mysql',
     }
 
-    d_num_component_2_id_in_username = {
-        '0001'      : 'fo',
-        '0002'      : 'bo',
-        'FO'        : 'pr',
-        'BO'        : 'pp',
-    }
-
     d_appcomp_2_paths = {
-        ( 'TOMCAT', 'RO', '0001' )     		: '/home/%s/produits/apache-tomcat-6.0.33/webapps/',
-        ( 'TOMCAT', 'RO', '0002' )     		: '/home/%s/produits/apache-tomcat-6.0.33/webapps/',
+        ( 'TOMCAT', 'RO', '0001' )     		: '/home/%s/bin/apache-tomcat-6.0.33/webapps/',
+        ( 'TOMCAT', 'RO', '0002' )     		: '/home/%s/bin/apache-tomcat-6.0.33/webapps/',
         ( 'TOMCAT', 'RO', 'BO' )     		: '/home/%s/bin/apache-tomcat-5.5.12/webapps/',
         ( 'TOMCAT', 'RO', 'FO' )     		: '/home/%s/bin/apache-tomcat-5.5.12/webapps/',
         ( 'TOMCAT', 'INSTALLER', '0001' )     	: '/home/%s/installer/',

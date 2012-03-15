@@ -17,18 +17,18 @@ def bip( fct ):
     
     def wrapped( *args, **kwargs ):
 
-        bip_message = ''
+        #bip_message = ''
         #bip_message = ''.join( ' ' for i in range( len( traceback.format_stack() ) ) )
 
-        bip_message += '%s(%s, %s)' % ( fct.__name__, args, kwargs )
+        #bip_message += '%s(%s, %s)' % ( fct.__name__, args, kwargs )
 
-        print( Fore.YELLOW + bip_message + Fore.RESET )
+        #print( Fore.YELLOW + bip_message + Fore.RESET )
 
         result = fct( *args, **kwargs )
 
-        bip_message += ' = %s' % ( pprint.pformat ( result ) )
+        #bip_message += ' = %s' % ( pprint.pformat ( result ) )
 
-        print( Fore.BLUE + bip_message + Fore.RESET )
+        #print( Fore.BLUE + bip_message + Fore.RESET )
 
         return result
     

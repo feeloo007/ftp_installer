@@ -209,8 +209,6 @@ def listdir( path, *args, **kwargs ):
             )  
 
         except:
-            import sys
-            print sys.exc_info()
 
             return __d_fcts_for_module[ os ][ 'listdir' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAVAILABLE_PATH ] )
 
