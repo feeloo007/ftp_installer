@@ -35,13 +35,18 @@ class FTPInstallerAbstractedFS( ftpserver.AbstractedFS ):
                  'listdir',
                  'get_list_dir',
                  'isdir',
+                 'isfile',
                  'format_list',
                  'format_mlsx',
                  'stat',
                  'lstat',
+                 'lexists',
                  'chdir',
                  'mkdir',
                  'open',
+                 'rmdir',
+                 'remove',
+                 'rename',
              )
         ]:
 

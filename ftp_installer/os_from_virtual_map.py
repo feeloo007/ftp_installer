@@ -19,6 +19,8 @@ import pprint
 
 from colorama import Fore
 
+import ftputil.ftp_error
+
 # Structure devant contenir :
 #     en cle, un module
 #     en valeur, un dictionnaire
@@ -277,7 +279,7 @@ def lstat( path, *args, **kwargs ):
 
             except:
 
-                return __d_fcts_for_module[ os ][ 'lstat' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAVAILABLE_KEYS ] )
+                return __d_fcts_for_module[ os ][ 'lstat' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAVAILABLE_PATH ] )
 
 
     # La ressouces demandes n'est pas virtuel
@@ -435,6 +437,125 @@ def isdir( path, *args, **kwargs ):
         return __d_fcts_for_module[ os.path ][ 'isdir' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
 
 
+@add_to_d_fcts_for_module( os.path )
+def isfile( path, *args, **kwargs ):
+
+    is_virtual, is_remote, d_infos = __virtual_map.is_virtual( path )
+
+    # Cas d'un path dans l'arborescence virtuelle
+    # Un path virtuel est toujours un repertoire
+    if is_virtual and not is_remote:
+
+        return False
+
+    # Cas d'un path dans l'arborescence remote
+    # On utilise la fonction isdir en version remote
+    # en completant avec les variables necessaires
+    # a la connexion remote et en utilisant
+    # virtual_map.VirtualMap.REMOTE_PATH_SEGMENT comme
+    # path
+    elif is_virtual and is_remote:
+
+        if not d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ]:
+
+            return False
+
+        else:
+
+            remote_kwargs = kwargs.copy()
+            remote_kwargs.update( { os_from_remote.OS_REMOTE_PARAMS: d_infos[ virtual_map.VirtualMap.INFOS ] } )
+
+            return __d_fcts_for_module[ os.path ][ 'isfile' ][ __REMOTE_CALL ](
+                       d_infos[ virtual_map.VirtualMap.INFOS ][ os_from_remote.ROOT ] + d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ],
+                       *args,
+                       **remote_kwargs
+                   )
+
+    else:
+
+        return __d_fcts_for_module[ os.path ][ 'isfile' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+
+@add_to_d_fcts_for_module( os.path )
+def exists( path, *args, **kwargs ):
+
+    is_virtual, is_remote, d_infos = __virtual_map.is_virtual( path )
+
+    # Cas d'un path dans l'arborescence virtuelle
+    # Un path virtuel est toujours un repertoire
+    if is_virtual and not is_remote:
+
+        return True
+
+    # Cas d'un path dans l'arborescence remote
+    # On utilise la fonction isdir en version remote
+    # en completant avec les variables necessaires
+    # a la connexion remote et en utilisant
+    # virtual_map.VirtualMap.REMOTE_PATH_SEGMENT comme
+    # path
+    elif is_virtual and is_remote:
+
+        if not d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ]:
+
+            return True
+
+        else:
+
+            remote_kwargs = kwargs.copy()
+            remote_kwargs.update( { os_from_remote.OS_REMOTE_PARAMS: d_infos[ virtual_map.VirtualMap.INFOS ] } )
+
+            return __d_fcts_for_module[ os.path ][ 'exists' ][ __REMOTE_CALL ](
+                       d_infos[ virtual_map.VirtualMap.INFOS ][ os_from_remote.ROOT ] + d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ],
+                       *args,
+                       **remote_kwargs
+                   )
+
+    else:
+
+        return False
+
+
+
+@add_to_d_fcts_for_module( os.path )
+def lexists( path, *args, **kwargs ):
+
+    is_virtual, is_remote, d_infos = __virtual_map.is_virtual( path )
+
+    # Cas d'un path dans l'arborescence virtuelle
+    # Un path virtuel est toujours un repertoire
+    if is_virtual and not is_remote:
+
+        return True
+
+    # Cas d'un path dans l'arborescence remote
+    # On utilise la fonction isdir en version remote
+    # en completant avec les variables necessaires
+    # a la connexion remote et en utilisant
+    # virtual_map.VirtualMap.REMOTE_PATH_SEGMENT comme
+    # path
+    elif is_virtual and is_remote:
+
+        if not d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ]:
+
+            return True
+
+        else:
+
+            remote_kwargs = kwargs.copy()
+            remote_kwargs.update( { os_from_remote.OS_REMOTE_PARAMS: d_infos[ virtual_map.VirtualMap.INFOS ] } )
+
+            # On pointe sur exists car lexists n'existe pas en version remote
+            return __d_fcts_for_module[ os.path ][ 'exists' ][ __REMOTE_CALL ](
+                       d_infos[ virtual_map.VirtualMap.INFOS ][ os_from_remote.ROOT ] + d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ],
+                       *args,
+                       **remote_kwargs
+                   )
+
+    else:
+
+        return False
+
+
+
 @add_to_d_fcts_for_module( os )
 def mkdir( path, *args, **kwargs ):
 
@@ -486,25 +607,154 @@ def open( filename, *args, **kwargs ):
 
         if not d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ]:
 
-            __d_fcts_for_module[ os ][ 'open' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+            __d_fcts_for_module[ os ][ 'open' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ], os.O_RDONLY )
 
         else:
 
             remote_kwargs = kwargs.copy()
             remote_kwargs.update( { os_from_remote.OS_REMOTE_PARAMS: d_infos[ virtual_map.VirtualMap.INFOS ] } )
 
-            f_result = __d_fcts_for_module[ os ][ 'open' ][ __REMOTE_CALL ](
-                       d_infos[ virtual_map.VirtualMap.INFOS ][ os_from_remote.ROOT ] + d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ],
-                       *args,
-                       **remote_kwargs
-                   )
 
-            # Dans le cas de l'appel systeme open, on complete le resultat de l'appel
-            # remote par le nom de fichier dans la structure purement virtuelle
-            f_result.name = filename
+            try:
+                 f_result = __d_fcts_for_module[ os ][ 'open' ][ __REMOTE_CALL ](
+                      d_infos[ virtual_map.VirtualMap.INFOS ][ os_from_remote.ROOT ] + d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ],
+                      *args,
+                      **remote_kwargs
+                 )
+
+                 # Dans le cas de l'appel systeme open, on complete le resultat de l'appel
+                 # remote par le nom de fichier dans la structure purement virtuelle
+                 f_result.name = filename
+
+            except:
+
+                __d_fcts_for_module[ os ][ 'open' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ], os.O_RDONLY )
 
             return f_result
 
     else:
 
-        return __d_fcts_for_module[ os ][ 'open' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+        return __d_fcts_for_module[ os ][ 'open' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ], os.O_RDONLY )
+
+
+
+@add_to_d_fcts_for_module( os )
+def rmdir( path, *args, **kwargs ):
+
+    is_virtual, is_remote, d_infos = __virtual_map.is_virtual( path )
+
+    if is_virtual and not is_remote:
+
+        return __d_fcts_for_module[ os ][ 'rmdir' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+
+    elif is_virtual and is_remote:
+
+        if not d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ]:
+
+            return __d_fcts_for_module[ os ][ 'rmdir' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+
+        else:
+
+            remote_kwargs = kwargs.copy()
+            remote_kwargs.update( { os_from_remote.OS_REMOTE_PARAMS: d_infos[ virtual_map.VirtualMap.INFOS ] } )
+
+            try:
+
+                return __d_fcts_for_module[ os ][ 'rmdir' ][ __REMOTE_CALL ](
+                    d_infos[ virtual_map.VirtualMap.INFOS ][ os_from_remote.ROOT ] + d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ],
+                    *args,
+                    **remote_kwargs
+                )
+            except:
+                
+                return __d_fcts_for_module[ os ][ 'rmdir' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+
+    else:
+
+        return __d_fcts_for_module[ os ][ 'rmdir' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+
+
+
+@add_to_d_fcts_for_module( os )
+def remove( path, *args, **kwargs ):
+
+    is_virtual, is_remote, d_infos = __virtual_map.is_virtual( path )
+
+    if is_virtual and not is_remote:
+
+        return __d_fcts_for_module[ os ][ 'remove' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+
+    elif is_virtual and is_remote:
+
+        if not d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ]:
+
+            return __d_fcts_for_module[ os ][ 'remove' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+
+        else:
+
+            remote_kwargs = kwargs.copy()
+            remote_kwargs.update( { os_from_remote.OS_REMOTE_PARAMS: d_infos[ virtual_map.VirtualMap.INFOS ] } )
+
+            try:
+
+                return __d_fcts_for_module[ os ][ 'remove' ][ __REMOTE_CALL ](
+                    d_infos[ virtual_map.VirtualMap.INFOS ][ os_from_remote.ROOT ] + d_infos[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ],
+                    *args,
+                    **remote_kwargs
+                )
+            except:
+
+                return __d_fcts_for_module[ os ][ 'remove' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+
+    else:
+
+        return __d_fcts_for_module[ os ][ 'remove' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ] )
+
+
+
+@add_to_d_fcts_for_module( os )
+def rename( old, new, *args, **kwargs ):
+
+    is_virtual_old, is_remote_old, d_infos_old = __virtual_map.is_virtual( old )
+    is_virtual_new, is_remote_new, d_infos_new = __virtual_map.is_virtual( new )
+
+    if not is_virtual_old or not is_virtual_new:
+
+        return __d_fcts_for_module[ os ][ 'rename' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ], kwargs[ PATH_PARAMS ][ PATH_TO_BROKEN_PATH ] )
+
+    if is_virtual_old and not is_remote_old:
+
+        return __d_fcts_for_module[ os ][ 'rename' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ], kwargs[ PATH_PARAMS ][ PATH_TO_BROKEN_PATH ] )
+
+
+    if is_virtual_new and not is_remote_new:
+
+        return __d_fcts_for_module[ os ][ 'rename' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ], kwargs[ PATH_PARAMS ][ PATH_TO_BROKEN_PATH ] )
+
+
+    if is_virtual_old and is_remote_old and is_virtual_new and is_remote_new:
+
+        if not d_infos_old[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ] or not d_infos_new[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ] :
+
+            return __d_fcts_for_module[ os ][ 'rename' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ], kwargs[ PATH_PARAMS ][ PATH_TO_BROKEN_PATH ] )
+
+        else:
+
+            remote_kwargs = kwargs.copy()
+            remote_kwargs.update( { os_from_remote.OS_REMOTE_PARAMS: d_infos_new[ virtual_map.VirtualMap.INFOS ] } )
+
+            try:
+
+                return __d_fcts_for_module[ os ][ 'rename' ][ __REMOTE_CALL ](
+                    d_infos_old[ virtual_map.VirtualMap.INFOS ][ os_from_remote.ROOT ] + d_infos_old[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ],
+                    d_infos_new[ virtual_map.VirtualMap.INFOS ][ os_from_remote.ROOT ] + d_infos_new[ virtual_map.VirtualMap.REMOTE_PATH_SEGMENT ],
+                    *args,
+                    **remote_kwargs
+                )
+            except:
+
+                return __d_fcts_for_module[ os ][ 'rename' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ], kwargs[ PATH_PARAMS ][ PATH_TO_BROKEN_PATH ] )
+
+    else:
+
+        return __d_fcts_for_module[ os ][ 'rename' ][ __REAL_CALL ]( kwargs[ PATH_PARAMS ][ PATH_TO_UNAUTHORIZED_PATH ], kwargs[ PATH_PARAMS ][ PATH_TO_BROKEN_PATH ] )

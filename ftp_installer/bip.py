@@ -17,8 +17,8 @@ def bip( fct ):
     
     def wrapped( *args, **kwargs ):
 
-        #bip_message = ''
-        #bip_message = ''.join( ' ' for i in range( len( traceback.format_stack() ) ) )
+        bip_message = ''
+        #####bip_message = ''.join( ' ' for i in range( len( traceback.format_stack() ) ) )
 
         #bip_message += '%s(%s, %s)' % ( fct.__name__, args, kwargs )
 

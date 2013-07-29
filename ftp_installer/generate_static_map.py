@@ -259,7 +259,7 @@ ascii_upload_enable=NO''',
         ( 'TOMCAT', 'INSTALLER' )	: 'YES',
         ( 'TOMCAT', 'DATAS' )		: 'YES',
         ( 'MYSQL', 'DUMPS' )		: 'NO',
-        ( 'MYSQL', 'EXECUTABLES' )	: 'NO',
+        ( 'MYSQL', 'EXECUTABLES' )	: 'YES',
     }
 
     def get_ftp_infos( appcode, appcomp, num_component, dir ):
