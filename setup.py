@@ -18,7 +18,6 @@ setup(name='ftp_installer',
       include_package_data=True,
       zip_safe=False,
       install_requires=[
-         'Fabric==1.8.2',
          'pyftpdlib==0.7.0',
          'colorama==0.2.7',
          'ftputil==2.6'
