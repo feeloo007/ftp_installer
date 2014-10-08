@@ -19,7 +19,7 @@ setup(name='ftp_installer',
       zip_safe=False,
       install_requires=[
          'pyftpdlib==0.7.0',
-         'colorama==0.2.7',
+         'colorama==0.3.2',
          'ftputil==2.6'
       ],
       entry_points="""
