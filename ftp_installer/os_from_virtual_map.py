@@ -19,8 +19,6 @@ import pprint
 
 from colorama import Fore
 
-import ftputil.ftp_error
-
 # Structure devant contenir :
 #     en cle, un module
 #     en valeur, un dictionnaire

@@ -20,7 +20,8 @@ setup(name='ftp_installer',
       install_requires=[
          'pyftpdlib==0.7.0',
          'colorama==0.3.2',
-         'ftputil==2.6'
+         'ftputil==3.1',
+         'simplejson==3.6.4'
       ],
       entry_points="""
       # -*- Entry points: -*-

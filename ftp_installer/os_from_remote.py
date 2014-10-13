@@ -20,6 +20,8 @@ import pprint
 
 from colorama import Fore
 
+import simplejson
+
 LOGIN			= '%s_LOGIN'		% __name__
 SERVER      		= '%s_SERVER'		% __name__
 PASSWORD		= '%s_PASSWORD' 	% __name__
@@ -56,6 +58,81 @@ def has_os_from_remote_params( fct ):
     return wrapped
 
 
+def cast_unicode_to_ascii( fct ):
+    """
+    decorator adressant un problème de compatibilité entre
+    pyftpdlib 0.7.0
+    et
+    ftpuil 3.1
+    ftputil 3.1 manipule les données en unicode alors que
+    pyftpdlib 0.7.0 les manipule en ascii.
+    Sous certaines conditions, les chaines unicode
+    altèrent le flux de données de pyftpdlib.
+    Par exemple, avec un client filezilla, qui conduit
+    à utiliser la méthode _AbstractedFS.format_mlsx
+    le fait qu'une partie des attributs du résultat d'un stat
+    soit en unicode conduit le système à ne pas pouvoir
+    afficher les fichiers.
+    On réalise donc un encodage en ascii de ces paramètres.
+    Un bug est clairement identifié avec les valeurs issue de stat
+    dont les objets sont instanciés depuis la classe :
+        ftputil.stat.StatResult
+    Pour les attributs st_uid et st_gid.
+
+    Pour un résultat de type unicode, on réalise un transoodage ascii.
+
+    Pour une série d'autre type, on utilise une propriété
+    de simplejson.
+    On commence par convertir en JSON ascii la structure python (on obtient
+    un str plutôt qu'un unicode).
+    Puis, on reconverti le str obtenue en structure python
+    en la passant en paramètre de la classe de départ.
+    Avec un str en entrée, simplejson génére une structure contenant
+    uniquement des str et non des unicodes.
+
+    Cette encodage ne sera plus nécessaire à partir des versions de
+    pyftpdlib manipulant les données en unicode.
+    """
+
+    @functools.wraps( fct )
+    def wrapped( *args, **kwargs ):
+
+        res 	= fct( * args, ** kwargs )
+
+        if (
+            isinstance( res, unicode )
+           ):
+            res = res.encode( 'ascii' )
+
+        if (
+            isinstance( res, ftputil.stat.StatResult )
+            or
+            isinstance( res, list )
+            or
+            isinstance( res, dict )
+           ):
+
+            try:
+
+                def _cast_unicode_to_ascii( res ):
+                    return res.__class__(
+                        simplejson.loads(
+                            simplejson.dumps(
+                                res
+                                ,
+                                encoding = "ascii"
+                            )
+                        )
+                    )
+
+                res = _cast_unicode_to_ascii( res )
+
+            except Exception, e:
+                print e
+
+        return res
+
+    return wrapped
 
 class OsRemoteFTPSession( ftplib.FTP ):
     def __init__( self, host, userid, password ):
@@ -68,6 +145,7 @@ class OsRemoteFTPSession( ftplib.FTP ):
 __d_ftp_clients = {}
 
 @bip.bip
+@cast_unicode_to_ascii
 @has_os_from_remote_params
 def remote_call( *args, **kwargs ):
 
