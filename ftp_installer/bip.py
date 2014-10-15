@@ -31,30 +31,37 @@ def bip( fct ):
         #print( Fore.BLUE + bip_message + Fore.RESET )
 
         return result
+
+    wrapped.__bipped	= True
     
     return wrapped 
 
 def add_bip_to_all_methods( cl ):
+    """
+        fonction appliquant à l'ensemble des méthodes
+        d'une classe le décorateur bip.
+        En coopération avec le décoracteur bip, il n'est pas possible
+        d'appliquer 2 fois le décoracteur bip à une méthode qui
+        est déjà le résultat du décorateur bip (__bipped).
+    """
 
-    origin_init = cl.__init__
-
-    @bip
-    def __init__( self, *args, **kwargs ):
-
-        origin_init(
-            self,
-            *args,
-            **kwargs
-        )
-
-        for mth in [ 
-                        member[ 0 ] 
-                        for member in inspect.getmembers( cl ) 
+    for method_name in [
+                        member[ 0 ]
+                        for member in inspect.getmembers( cl )
                         if inspect.ismethod( getattr( cl, member[ 0 ] ) )
                    ]:
 
-            setattr( cl, mth, bip( getattr( cl, mth ) ) )
+        if not hasattr( getattr( cl, method_name ), '__bipped' ):
 
-    cl.__init__ = __init__
+            setattr(
+                cl,
+                method_name,
+                bip(
+                    getattr(
+                        cl,
+                        method_name
+                    )
+                )
+            )
 
     return cl
