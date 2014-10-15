@@ -108,6 +108,7 @@ def add_to_d_fcts_for_module( m ):
 
          assert( not __d_fcts_for_module[ m ].has_key( fct.__name__ ) ), u'La fonction a deja ete enregistree'
 
+         @functools.wraps( fct )
          def wrapper_to_remote_call( *args, **kwargs ):
 
              return os_from_remote.remote_call( *args, m = m, fct = fct, **kwargs )
