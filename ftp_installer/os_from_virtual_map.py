@@ -63,6 +63,11 @@ __VIRTUAL_CALL			= 1
 __REMOTE_CALL			= 2
 
 def has_virtual_params( fct ):
+    """
+        Ce décorateur vérifie la réalisation d'un contrat.
+        Si le contrôle n'est pas réalisée, une erreur d'assertion
+        a lieu.
+    """
 
     @functools.wraps( fct )
     def wrapped( *args, **kwargs ):
@@ -118,12 +123,13 @@ def add_to_d_fcts_for_module( m ):
              has_virtual_params(
                  bip.bip(  
                       fct
-                 ) 
+                 )
              ),
              bip.bip(
                  wrapper_to_remote_call
              )
          )
+
 
          @functools.wraps( fct )
          def wrapped( *args, **kwargs ):
@@ -160,12 +166,59 @@ def add_to_d_fcts_for_module( m ):
 
 
 def bypass_call_to_real( fct, d_virtual_params = { PATH_TO_VIRTUAL_PATH: '/home/cloudmgr/.witnessdir/VIRTUAL', PATH_TO_BROKEN_PATH: '/home/cloudmgr/.witnessdir/BROKEN', PATH_TO_UNAVAILABLE_PATH: '/home/cloudmgr/.witnessdir/UNAVAILABLE', PATH_TO_UNAUTHORIZED_PATH: '/home/cloudmgr/.witnessdir/UNAVAILABLE/UNAUTHORIZED' } ):
-
+     """
+         Fonction permettant d'appliquer à une fonction
+         les paramètres provenant de d_virtaul_params
+         à partir du moment où le type de fonciton est connu
+         dans __d_le_has_bypass_call_to_real.
+     """
      __d_le_set_bypass_call_to_real[ type( fct ) ]( fct, d_virtual_params )
 
      return fct
 
+def has_bypass_call_to_real_setted( fct ):
+     """
+         Fonction permettant de vérifier que bypass_call_to_real
+         est appliquée à une fonction (dont le type est définie dans
+         __d_le_has_bypass_call_to_real.
+     """
+     return __d_le_has_bypass_call_to_real[ type( fct ) ]( fct )
 
+def add_bypass_call_to_real( l_method_names ):
+    """
+        ce decorateur reçoit une liste de nom de méthode
+        d'une classe à encapsuler dans os_from_virtual_map.bypass_call_to_real.
+        Dans l'hypothèse où l'encapsulation aurait déjà été réalisée, on fait un
+        test à priori.
+        Cet decorateur remplace l'implémentation précédente dans
+        FTPInstallerAbstractedFS.__init__
+        qui altérait les méthodes de la classe FTPInstallerAbstractedFS
+        à chéque instanciation d'un objet FTPInstallerAbstractedFS.
+    """
+    def wrapped( cl ):
+
+        for method_name in l_method_names:
+
+            if not has_bypass_call_to_real_setted(
+                 getattr(
+                     cl,
+                     method_name
+                 )
+            ):
+                setattr(
+                    cl,
+                    method_name,
+                    bypass_call_to_real(
+                        getattr(
+                            cl,
+                            method_name
+                        )
+                    )
+                )
+
+        return cl
+
+    return wrapped
    
 @add_to_d_fcts_for_module( os )
 def getcwd( *args, **kwargs ):

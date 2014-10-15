@@ -11,7 +11,42 @@ import inspect
 # Chargement du module ecrasant les fonctions de os
 import os_from_virtual_map
 
+
 @bip.add_bip_to_all_methods
+@os_from_virtual_map.add_bypass_call_to_real(
+    [
+                 'listdir'
+                 ,
+                 'get_list_dir'
+                 ,
+                 'isdir'
+                 ,
+                 'isfile'
+                 ,
+                 'format_list'
+                 ,
+                 'format_mlsx'
+                 ,
+                 'stat'
+                 ,
+                 'lstat'
+                 ,
+                 'lexists'
+                 ,
+                 'chdir'
+                 ,
+                 'mkdir'
+                 ,
+                 'open'
+                 ,
+                 'rmdir'
+                 ,
+                 'remove'
+                 ,
+                 'rename'
+                 ,
+    ]
+)
 class FTPInstallerAbstractedFS( ftpserver.AbstractedFS ):
 
     def __init__(self, root, cmd_channel):
@@ -26,40 +61,6 @@ class FTPInstallerAbstractedFS( ftpserver.AbstractedFS ):
         # are responsible to set _cwd attribute as necessary.
 
         ftpserver.AbstractedFS.__init__( self, '/home/cloudmgr/.witnessdir', cmd_channel )
-
-        # Boucle sur les methodes qui voient leur module os virtualise
-        for mth in [
-             member[ 0 ]
-             for member in inspect.getmembers( FTPInstallerAbstractedFS )
-             if member[ 0 ] in (
-                 'listdir',
-                 'get_list_dir',
-                 'isdir',
-                 'isfile',
-                 'format_list',
-                 'format_mlsx',
-                 'stat',
-                 'lstat',
-                 'lexists',
-                 'chdir',
-                 'mkdir',
-                 'open',
-                 'rmdir',
-                 'remove',
-                 'rename',
-             )
-        ]:
-
-            setattr(
-                FTPInstallerAbstractedFS,
-                mth,
-                os_from_virtual_map.bypass_call_to_real(
-                    getattr(
-                        FTPInstallerAbstractedFS,
-                        mth
-                    )
-                )
-            )
 
     def ftp2fs(self, ftppath ):
 
