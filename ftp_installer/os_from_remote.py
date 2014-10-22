@@ -22,6 +22,10 @@ from colorama import Fore
 
 import simplejson
 
+import sys
+
+import socket
+
 LOGIN			= '%s_LOGIN'		% __name__
 SERVER      		= '%s_SERVER'		% __name__
 PASSWORD		= '%s_PASSWORD' 	% __name__
@@ -193,7 +197,13 @@ def remote_call( *args, **kwargs ):
                     kwargs[ 'fct' ].__name__
                 )( *args, **kwargs_for_remote )
 
-        except:
+        except ( ftputil.error.PermanentError, ftputil.error.FTPIOError ), pe:
+            # On ne filtre pas ces exceptions
+            # elles ne remontent pas à cause d'un
+            # problème d'accès au serveur FTP
+            raise pe
+
+        except ( ftputil.error.TemporaryError, socket.error ), te:
             # Relancement de la commande
             # Lors d'une premiere exception
             # Ceci peut-etre du a un inactivite de
@@ -217,5 +227,12 @@ def remote_call( *args, **kwargs ):
                         kwargs[ 'fct' ].__name__
                     )( *args, **kwargs_for_remote )
 
-            except: 
-                raise
+            except Exception, e:
+                print >> sys.stderr, Fore.RED, e.__class__, pprint.pformat( e ), pprint.pformat( args ), pprint.pformat( kwargs ), Fore.RESET
+                raise te
+
+        except Exception, undefined_e:
+            # Erreurs non gérées spécifiquement
+            # potentiellement peut donc lieu à un filtrage de l'exception
+            print >> sys.stderr, Fore.RED, undefined_e.__class__, pprint.pformat( undefined_e ), pprint.pformat( args ), pprint.pformat( kwargs ), Fore.RESET
+            raise
