@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-from pyftpdlib                  import ftpserver
+from pyftpdlib                  import servers
+from pyftpdlib                  import filesystems
 
 import bip
 
@@ -47,7 +48,7 @@ import os_from_virtual_map
                  ,
     ]
 )
-class FTPInstallerAbstractedFS( ftpserver.AbstractedFS ):
+class FTPInstallerAbstractedFS( filesystems.AbstractedFS ):
 
     def __init__(self, root, cmd_channel):
         """
@@ -60,7 +61,7 @@ class FTPInstallerAbstractedFS( ftpserver.AbstractedFS ):
         # to reflect the real filesystem) users overriding this class
         # are responsible to set _cwd attribute as necessary.
 
-        ftpserver.AbstractedFS.__init__( self, '/home/cloudmgr/.witnessdir', cmd_channel )
+        filesystems.AbstractedFS.__init__( self, u'/home/cloudmgr/.witnessdir', cmd_channel )
 
     def ftp2fs(self, ftppath ):
 

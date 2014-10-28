@@ -106,7 +106,7 @@ def add_to_d_fcts_for_module( m ):
 
      def wrapper( fct ):
 
-         assert( not __d_fcts_for_module[ m ].has_key( fct.__name__ ) ), u'La fonction a deja ete enregistree'
+         assert( not __d_fcts_for_module[ m ].has_key( fct.__name__ ) ), 'La fonction a deja ete enregistree'
 
          @functools.wraps( fct )
          def wrapper_to_remote_call( *args, **kwargs ):
@@ -165,14 +165,14 @@ def add_to_d_fcts_for_module( m ):
      return wrapper
 
 
-
-def bypass_call_to_real( fct, d_virtual_params = { PATH_TO_VIRTUAL_PATH: '/home/cloudmgr/.witnessdir/VIRTUAL', PATH_TO_BROKEN_PATH: '/home/cloudmgr/.witnessdir/BROKEN', PATH_TO_UNAVAILABLE_PATH: '/home/cloudmgr/.witnessdir/UNAVAILABLE', PATH_TO_UNAUTHORIZED_PATH: '/home/cloudmgr/.witnessdir/UNAVAILABLE/UNAUTHORIZED' } ):
+def bypass_call_to_real( fct, d_virtual_params = { PATH_TO_VIRTUAL_PATH: u'/home/cloudmgr/.witnessdir/VIRTUAL', PATH_TO_BROKEN_PATH: u'/home/cloudmgr/.witnessdir/BROKEN', PATH_TO_UNAVAILABLE_PATH: u'/home/cloudmgr/.witnessdir/UNAVAILABLE', PATH_TO_UNAUTHORIZED_PATH: u'/home/cloudmgr/.witnessdir/UNAVAILABLE/UNAUTHORIZED' } ):
      """
          Fonction permettant d'appliquer à une fonction
          les paramètres provenant de d_virtaul_params
          à partir du moment où le type de fonciton est connu
          dans __d_le_has_bypass_call_to_real.
      """
+
      __d_le_set_bypass_call_to_real[ type( fct ) ]( fct, d_virtual_params )
 
      return fct
@@ -240,7 +240,7 @@ def listdir( path, *args, **kwargs ):
     # qui sont contenus dans les cles de d_infos[ virtual_map.VirtualMap.INFOS ]
     if is_virtual and not is_remote:
 
-        return [ dir.encode( 'ascii' ) for dir in d_infos[ virtual_map.VirtualMap.INFOS ].keys() ]
+        return d_infos[ virtual_map.VirtualMap.INFOS ].keys()
 
     # Cas d'un appel a une ressource remote
     # on

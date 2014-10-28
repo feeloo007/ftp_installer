@@ -1,18 +1,20 @@
 # -*- coding: UTF-8 -*-
-from pyftpdlib 			import ftpserver
+from pyftpdlib 			import servers
+from pyftpdlib 			import handlers
+from pyftpdlib 			import authorizers
 from ftp_installer_abstractedfs import FTPInstallerAbstractedFS
 
 def main():
-    authorizer = ftpserver.DummyAuthorizer()
+    authorizer = authorizers.DummyAuthorizer()
     
     authorizer.add_user( 
-        'test', 
-        password	= 'test', 
-        homedir 	= '/home/cloudmgr/.witnessdir', 
-        perm		= 'elradfmw' 
+        u'test',
+        password	= u'test',
+        homedir 	= u'/home/cloudmgr/.witnessdir',
+        perm		= u'elradfmw'
     )
 
-    handler 			= ftpserver.FTPHandler
+    handler 			= handlers.FTPHandler
     handler.authorizer 		= authorizer
     handler.abstracted_fs 	= FTPInstallerAbstractedFS
 
@@ -21,7 +23,7 @@ def main():
                   2121 
               )
 
-    server = ftpserver.FTPServer( 
+    server = servers.FTPServer(
                  address, 
                  handler 
              )
