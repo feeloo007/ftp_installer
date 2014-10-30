@@ -2,6 +2,7 @@
 from pyftpdlib 			import servers
 from pyftpdlib 			import handlers
 from pyftpdlib 			import authorizers
+from ftp_handler_from_virtual	import FTPHandlerFromVirtual
 from ftp_installer_abstractedfs import FTPInstallerAbstractedFS
 
 def main():
@@ -14,7 +15,7 @@ def main():
         perm		= u'elradfmw'
     )
 
-    handler 			= handlers.FTPHandler
+    handler 			= FTPHandlerFromVirtual
     handler.authorizer 		= authorizer
     handler.abstracted_fs 	= FTPInstallerAbstractedFS
 
